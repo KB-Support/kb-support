@@ -69,7 +69,7 @@ function kbs_get_ticket( $id_or_object )	{
  * @since	1.0
  * @param	str			$field	The field by which to retrieve.
  * @param	mixed		$value	The value of the field.
- * @return	obj|false	The post object if found, otherwise false 
+ * @return	obj|false	The post object if found, otherwise false
  */
 function kbs_get_ticket_by( $field, $value )	{
 	if ( 'id' == $field )	{
@@ -113,11 +113,11 @@ function kbs_get_ticket_categories( $args = array() )	{
 		'orderby'       => 'name',
 		'order'         => 'ASC'
 	);
-	
+
 	$args = wp_parse_args( $args, $defaults );
-	
+
 	$ticket_categories = get_categories( $args );
-	
+
 	return apply_filters( 'kbs_get_ticket_categories', $ticket_categories, $args );
 } // kbs_get_ticket_categories
 
@@ -204,8 +204,7 @@ function kbs_get_ticket_orderby_options()	{
 	$options = array(
 		'ID'       => __( 'ID', 'kb-support' ),
 		'title'    => __( 'Subject', 'kb-support' ),
-		'date'     => __( 'Date Created', 'kb-support' ),
-		'modified' => __( 'Date Modified', 'kb-support' )
+		'date'     => __( 'Date Modified', 'kb-support' ),
 	);
 
 	$options = apply_filters( 'kbs_ticket_orderby_options', $options );
@@ -218,9 +217,11 @@ function kbs_get_ticket_orderby_options()	{
  *
  * Returns the total number of tickets.
  *
- * @since	1.0
- * @param	arr	$args	List of arguments to base the ticket count on
- * @return	arr	$count	Number of tickets sorted by ticket date
+ * @param arr $args List of arguments to base the ticket count on
+ *
+ * @return    arr    $count    Number of tickets sorted by ticket date
+ * @throws Exception
+ * @since    1.0
  */
 function kbs_count_tickets( $args = array() ) {
 
@@ -530,7 +531,7 @@ function kbs_get_ticket_statuses( $can_select = true )	{
 	$ticket_statuses = kbs_get_post_statuses( 'labels', $can_select );
 	$statuses        = array();
     $defaults        = kbs_get_default_ticket_statuses();
-	
+
 	foreach ( $ticket_statuses as $ticket_status ) {
 		$statuses[ $ticket_status->name ] = esc_html( $ticket_status->label );
 	}
@@ -643,7 +644,7 @@ function kbs_get_ticket_log_sources()	{
     }
 
 	$sources = apply_filters( 'kbs_ticket_log_sources', $sources );
-	
+
 	return $sources;
 
 } // kbs_get_ticket_log_sources
@@ -824,7 +825,7 @@ function kbs_add_ticket_from_form( $form_id, $form_data )	{
 			}
 		} else	{
 			$ticket_data[ $field->post_name ] = array( $field->post_title, strip_tags( addslashes( $form_data[ $field->post_name ] ) ) );
-		
+
 			$data[] = '<strong>' . $field->post_title . '</strong><br />' . $form_data[ $field->post_name ];
 		}
 	}
@@ -1097,7 +1098,7 @@ function kbs_get_ticket_user_email( $ticket_id ) {
  */
 function kbs_get_ticket_url( $ticket_id, $admin = false, $key = false )	{
 	$scheme = null;
-	
+
 	if ( $admin )	{
 
 		$scheme = defined( 'FORCE_SSL_ADMIN' ) && FORCE_SSL_ADMIN ? 'https' : 'admin';
@@ -1134,7 +1135,7 @@ function kbs_get_ticket_url( $ticket_id, $admin = false, $key = false )	{
  */
 function kbs_get_agent( $ticket_id )	{
 	$kbs_ticket = new KBS_Ticket( $ticket_id );
-	
+
 	return $kbs_ticket->agent_id;
 } // kbs_get_agent
 
@@ -1440,7 +1441,7 @@ function kbs_remove_agents_from_ticket( $ticket, $agent_ids )   {
  */
 function kbs_get_ticket_source( $ticket_id )	{
 	$kbs_ticket = new KBS_Ticket( $ticket_id );
-	
+
 	return $kbs_ticket->get_source();
 } // kbs_get_ticket_source
 
@@ -1580,9 +1581,8 @@ function kbs_get_note_html( $note, $ticket_id = 0 ) {
 	), admin_url() ), 'kbs_delete_ticket_note_' . $note->comment_ID, 'kbs_note_nonce' );
 
 	$actions = array(
-        'read_note'   => '<a href="#" class="toggle-view-note-option-section">' . __( 'View Note', 'kb-support' ) . '</a>',
-        'delete_note' => '<a href="' . $delete_note_url . '" class="kbs-remove-row kbs-delete">' . __( 'Delete Note', 'kb-support' ) . '</a>'
-    );
+		'delete_note' => '<a href="' . $delete_note_url . '" class="kbs-remove-row kbs-delete" title="' . esc_attr__( 'Delete Note', 'kb-support' ) . '">' . esc_html__( 'Delete Note', 'kb-support' ) . '</a>',
+	);
 
 	if ( $note->user_id != get_current_user_id() && ! current_user_can( $delete_note_cap ) )	{
 		unset( $actions['delete_note'] );
@@ -1594,11 +1594,35 @@ function kbs_get_note_html( $note, $ticket_id = 0 ) {
 
     <div class="kbs-notes-row-header">
         <span class="kbs-notes-row-title">
-            <?php echo apply_filters( 'kbs_notes_title', sprintf( __( '%s by %s', 'kb-support' ), date_i18n( $date_format, strtotime( $note->comment_date ) ), $user ), $note ); ?>
+			<?php echo '<strong>' . esc_html( $user ) . '</strong>' . esc_html__( ' created a note' ); ?>
         </span>
 
         <span class="kbs-notes-row-actions">
-			<?php echo implode( '&nbsp;&#124;&nbsp;', $actions ); ?>
+			<?php
+			$dif         = absint( time() - strtotime( $note->comment_date ) );
+			$time_passed = 0;
+
+			if ( ( $dif / ( 60 ) ) < 60 ) {
+				$time_passed = absint( $dif / ( 60 ) ) . ( ( absint( $dif / ( 60 ) ) <= 1 ) ? esc_html__( ' minute', 'kb-support' ) : esc_html__( ' minutes ago', 'kb-support' ) );
+			} else if ( ( $dif / ( 60 * 60 ) ) <= 24 ) {
+				$time_passed = absint( $dif / ( 60 * 60 ) ) . ( ( absint( $dif / ( 60 * 60 ) ) <= 1 ) ? esc_html__( ' hour', 'kb-support' ) : esc_html__( ' hours ago', 'kb-support' ) );
+			} else {
+				$time_passed = absint( $dif / ( 60 * 60 * 24 ) ) . ( ( absint( $dif / ( 60 * 60 * 24 ) ) <= 1 ) ? esc_html__( ' day', 'kb-support' ) : esc_html__( ' days ago', 'kb-support' ) );
+			}
+			echo $time_passed;
+			?>
+			<?php if ( $actions && ! empty( $actions ) ) {
+				?>
+				<a href="#" class="helptain-admin-row-actions-toggle dashicons dashicons-ellipsis"></a>
+				<ul class="helptain-admin-row-actions helptain-actions-sub-menu kbs-hidden">
+					<?php
+					foreach ( $actions as $action ) {
+						echo '<li>' . $action . '</li>';
+					}
+					?>
+				</ul>
+			<?php } ?>
+
         </span>
     </div>
 

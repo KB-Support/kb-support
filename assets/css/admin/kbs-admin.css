@@ -69,7 +69,7 @@
 	box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 .kbs-authd	{
-	background-image: url(../images/tick.png);
+	background-image: url(../../images/tick.png);
 	background-repeat: no-repeat;
 	background-position: 98% 50%;
 }
@@ -87,6 +87,23 @@
 	vertical-align: baseline;
 	background-color: #999;
 	border-radius: 3px;
+}
+
+.kbs-label.kbs-label-status {
+	width:10px;
+	height:10px;
+	border-radius:5px;
+	padding:0;
+	margin-right:5px;
+}
+
+.kbs-label.kbs-reply-status {
+	transform:rotate(90deg);
+	background:transparent;
+	padding:0;
+	margin-right:5px;
+	width:20px;
+	height:14px;
 }
 
 .kbs-label a,
@@ -498,7 +515,7 @@ span.price_restricted:before {
 .kbs_field_wrapper .kbs_field_field_container { position: relative; }
 .kbs_remove { margin: 8px 0 0 0; cursor: pointer; width: 10px; height: 10px; display: inline-block; text-indent: -9999px; overflow: hidden; }
 .kbs_remove:active, .kbs_remove:hover { background-position: -10px 0!important }
-.kbs_draghandle { display: block; width: 20px; height: 20px; background: url(../images/kbs-cross-hair.png); cursor: move; margin: 4px 0 0 0; }
+.kbs_draghandle { display: block; width: 20px; height: 20px; background: url(../../images/kbs-cross-hair.png); cursor: move; margin: 4px 0 0 0; }
 .kbs_default_wrapper { text-align: center; width: 25px; }
 #kbs_formfields .kbs_meta_field_label_wrap p input,
 #kbs_formfields .kbs_meta_field_label_wrap p select,
@@ -522,25 +539,26 @@ a.kbs_ticket_form_data	{
 	font-size: 12px;
 	text-align: right;
 }
-.kbs_ticket_content_wrapper:not(:first-child),
-.kbs_historic_replies_wrapper:not(:first-child),
-.kbs_ticket_notes_wrapper:not(:first-child)	{
-	margin-top: 12px;
-}
 
 .kbs-ticket-content-row-actions,
 .kbs-replies-row-actions,
 .kbs-notes-row-actions {
-	color: #777;
-	font-size: 12px;
+	color     : #777;
+	font-size : 12px;
+	position  : relative;
 }
+
 .kbs-ticket-content-row-actions,
 .kbs-replies-row-actions a,
 .kbs-notes-row-actions a {
 	text-decoration: none;
 	width: auto;
-	cursor: pointer;
 	vertical-align: middle;
+}
+
+.kbs-replies-row-actions a,
+.kbs-notes-row-actions a {
+	cursor : pointer;
 }
 
 .kbs-ticket-content-row-actions .toggle-add-reply-option-section,
@@ -548,26 +566,39 @@ a.kbs_ticket_form_data	{
 .kbs-ticket-content-row-actions .toggle-view-submission-option-section,
 .kbs-ticket-content-row-actions .toggle-flagged-status-option-section,
 .kbs-replies-row-actions .toggle-view-reply-option-section,
-.kbs-replies-row-actions .toggle-reply-option-create-article,
 .kbs-notes-row-actions .toggle-view-note-option-section {
 	color: #777;
 }
+
+.kbs-replies-row-actions .toggle-reply-option-create-article {
+	color:green;
+}
+
+.kbs-replies-row-actions .toggle-reply-option-create-article:hover {
+	color:#009900;
+}
+
+.kbs-notes-row-actions .toggle-view-note-option-section {
+	font-size : 20px;
+}
+
 .kbs-ticket-content-row-actions .toggle-add-reply-option-section:hover,
 .kbs-ticket-content-row-actions .toggle-view-participants-option-section:hover,
 .kbs-ticket-content-row-actions .toggle-view-submission-option-section:hover,
 .kbs-ticket-content-row-actions .toggle-flagged-status-option-section:hover,
 .kbs-replies-row-actions .toggle-view-reply-option-section:hover,
-.kbs-notes-row-actions .toggle-view-note-option-section:hover,
-.kbs-replies-row-actions .toggle-reply-option-create-article:hover {
+.kbs-notes-row-actions .toggle-view-note-option-section:hover {
 	color: #444;
 }
 
 .kbs-ticket-content-row-header,
 .kbs-replies-row-header,
 .kbs-notes-row-header {
-	clear: both;
-	background: #f1f1f1;
-	border: 1px solid #e5e5e5;
+	clear             : both;
+	border-width      : 0;
+	border-left-width : 5px;
+	border-style      : solid;
+	border-color      : #93a1b0;
 }
 
 .kbs-ticket-content-row-header:before,
@@ -591,7 +622,6 @@ a.kbs_ticket_form_data	{
 .kbs-notes-row-title {
 	float: left;
 	font-size: 12px;
-    font-weight: 600;
 }
 
 .kbs-ticket-content-row-title,
@@ -657,12 +687,11 @@ a.kbs_ticket_form_data	{
 .kbs-custom-ticket-sections-wrap,
 .kbs-replies-content-wrap,
 .kbs-notes-content-wrap {
-    display: none;
-	border-width: 0 1px 1px;
-	border-style: solid;
-	border-color: #e5e5e5;
-	box-sizing: border-box;
-	width: 100%;
+	border-width : 0 0 0 5px;
+	border-style : solid;
+	border-color : #93a1b0;
+	box-sizing   : border-box;
+	width        : 100%;
 }
 
 .kbs-custom-ticket-section,
@@ -671,11 +700,12 @@ a.kbs_ticket_form_data	{
 .kbs-notes-content-section {
 	display: block;
 	padding: 10px 8px;
-	border-bottom: 1px solid rgba( 222, 222, 222, 0.3 );
 }
 
-.kbs-replies-files-section	{
-	background: #f9f9f9;
+.kbs-custom-ticket-section,
+.kbs-notes-content-section {
+	border-bottom : 1px solid rgba(222, 222, 222, 0.3);
+
 }
 
 .kbs-custom-ticket-section:last-child,
@@ -723,9 +753,9 @@ a.kbs_ticket_form_data	{
 	background: #f1f1f1;
 }
 
-.space-between { 
-	justify-content: space-between; 
-}  
+.space-between {
+	justify-content: space-between;
+}
 
 .participant-item {
 	width: 33%;
@@ -1442,6 +1472,457 @@ p.kbs-extension-desc {
 		width: 100% !important;
 		margin: 10px 0;
     }
-    
 
+
+}
+
+table tr.type-kbs_ticket .kbs-status {
+	padding:3px;
+	border-radius:15px;
+	color:#fff;
+	display:inline-block;
+	min-width:75px;
+	text-align:center;
+}
+
+/*
+** Toggles
+ */
+
+.wpchill-toggle {
+	position: relative;
+	user-select: none;
+	display: inline-block;
+	margin-right:15px;
+	vertical-align:middle;
+}
+
+.wpchill-toggle__items {
+	box-sizing: border-box;
+	display: inline-block;
+	position: relative;
+}
+.wpchill-toggle__items > * {
+	box-sizing: inherit;
+}
+
+.wpchill-toggle__input[type=checkbox],
+body .wpchill-toggle__input[type=checkbox] {
+	border-radius: 2px;
+	border: 2px solid #6c7781;
+	transition: none;
+	height: 100%;
+	left: 0;
+	top: 0;
+	margin: 0;
+	padding: 0;
+	opacity: 0;
+	position: absolute;
+	width: 100%;
+	z-index: 1; }
+
+.wpchill-toggle__track,
+body .wpchill-toggle__track {
+	background-color: #fff;
+	border: 2px solid #6c7781;
+	border-radius: 9px;
+	display: inline-block;
+	height: 18px;
+	width: 36px;
+	vertical-align: top;
+	transition: background .2s ease; }
+
+.wpchill-toggle__thumb,
+body .wpchill-toggle__thumb {
+	background-color: #6c7781;
+	border: 5px solid #6c7781;
+	border-radius: 50%;
+	display: block;
+	height: 10px;
+	width: 10px;
+	position: absolute;
+	left: 4px;
+	top: 4px;
+	transition: transform .2s ease; }
+
+body .wpchill-toggle__thumb,
+body .wpchill-toggle__track {
+	min-width:auto;
+	min-height:auto;
+	float:none;
+	padding:0;
+}
+
+.wpchill-toggle__off {
+	position: absolute;
+	right: 6px;
+	top: 6px;
+	color: #6c7781;
+	fill: currentColor; }
+
+.wpchill-toggle__on {
+	position: absolute;
+	top: 6px;
+	left: 8px;
+	border: 1px solid #fff;
+	outline: 1px solid transparent;
+	outline-offset: -1px;
+	display: none; }
+
+.wpchill-toggle__input[type=checkbox]:checked + .wpchill-toggle__items .wpchill-toggle__track {
+	background-color: #11a0d2;
+	border: 9px solid transparent; }
+
+.wpchill-toggle__input[type=checkbox]:checked + .wpchill-toggle__items .wpchill-toggle__thumb {
+	background-color: #fff;
+	border-width: 0;
+	transform: translateX(18px); }
+
+.wpchill-toggle__input[type=checkbox]:checked + .wpchill-toggle__items .wpchill-toggle__off {
+	display: none; }
+
+.wpchill-toggle__input[type=checkbox]:checked + .wpchill-toggle__items .wpchill-toggle__on {
+	display: inline-block; }
+
+/**
+** End toggles
+ */
+
+/**
+Tooltips
+ */
+
+.wpchill-tooltip {
+	position: relative;
+	display: inline-block;
+	float: left;
+	margin-right: 10px;
+}
+
+.wpchill-tooltip > span {
+	cursor: pointer;
+	color: #0073aa;
+	text-decoration: underline;
+	margin-left: 5px;
+}
+
+.wpchill-tooltip .wpchill-tooltip-content {
+	display: none;
+	position: absolute;
+	top: 50%;
+	right: -10px;
+	transform: translate( 100% ,-50% );
+	width: 300px;
+	background: #000;
+	color: #fff;
+	padding: 10px;
+	box-sizing: border-box;
+	z-index: 99;
+}
+
+.wpchill-tooltip .wpchill-tooltip-content:before {
+	content: '';
+	width: 0px;
+	height: 0px;
+	border-style: solid;
+	border-width: 8px 8px 8px 0;
+	border-color: transparent #000 transparent transparent;
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: -8px;
+	transform: translateY( -50% );
+}
+
+.wpchill-tooltip:hover .wpchill-tooltip-content {
+	display: block;
+}
+/**
+End Tooltips
+ */
+
+.wpchill-no-float {
+	float:none;
+}
+
+.kbs_option_support_hours table th {
+	vertical-align:middle;
+}
+
+.kbs-ricket-reply-note-wrapper {
+	margin-bottom:25px;
+}
+
+/**
+** Ticket action bar
+ */
+
+#helptain-action-bar {
+	border       : 1px solid #c3c4c7;
+	position     : sticky;
+	top          : 0;
+	padding      : 5px 0;
+	background   : #fff;
+}
+
+#helptain-action-bar .helptain-action-buttons {
+	margin : 0;
+}
+
+#helptain-action-bar .helptain-action-buttons .helptain-action-button {
+	list-style-type : none;
+	display         : inline-block;
+	padding         : 5px 10px;
+	position        : relative;
+	margin-bottom   : 0;
+}
+
+#helptain-action-bar .helptain-action-buttons .helptain-action-button a {
+	font-size  : 20px;
+	color      : #aeb6c0;
+	outline    : none;
+	box-shadow : none;
+}
+
+#helptain-action-bar .helptain-action-buttons .helptain-action-button a.active,
+#helptain-action-bar .helptain-action-buttons .helptain-action-button a:hover {
+	color : #556575;
+}
+
+#helptain-action-bar .helptain-action-buttons li.ticket-status {
+	float         : right;
+	border-radius : 30px;
+	color         : #fff;
+	margin-right  : 15px;
+}
+
+#helptain-action-bar .helptain-action-button ul#helptain_agent_select li.active {
+	font-weight : bold;
+}
+
+/**
+** Ticket action bar modifications
+ */
+
+.helptain-action-wrapper {
+	position   : sticky;
+	top        : 32px;
+	box-shadow : 0 3px 3px rgba(0, 0, 0, 0.2);
+	z-index    : 9999;
+}
+
+#kbs_historic_reply_fields {
+	padding-top : 25px;
+}
+
+.kbs_historic_replies_wrapper[expanded="false"]  .kbs-notes-row-actions a:not(.toggle-view-note-option-section),
+.kbs_historic_replies_wrapper[expanded="false"]  .kbs-replies-row-actions a:not(.toggle-view-reply-option-section){
+	display : none;
+}
+
+.kbs-notes-row-header,
+.kbs_historic_replies_wrapper .kbs-notes-content-wrap {
+	border-color : orange;
+}
+
+.kbs-notes-row-header,
+.kbs-replies-row-header {
+	padding : 25px 25px 0 45px;
+}
+
+.kbs-replies-row-header.is-support,
+.kbs-replies-content-wrap.is-support {
+	border-color:#1292ee;
+}
+
+.kbs-notes-row-header .kbs-notes-row-title,
+.kbs-replies-row-header .kbs-replies-row-title,
+.kbs-notes-content-wrap .kbs-notes-content-section,
+.kbs-replies-content-wrap .kbs-replies-content-section {
+	padding : 0;
+}
+
+.kbs-notes-content-wrap .kbs-notes-content-section p,
+.kbs-replies-content-wrap .kbs-replies-content-section p {
+	margin-top : 0;
+}
+
+.kbs-notes-content-wrap,
+.kbs-replies-content-wrap {
+	padding : 0 25px 25px 45px;
+}
+
+.kbs-notes-row-header .kbs-notes-row-title,
+.kbs-replies-row-header .kbs-replies-row-title,
+.kbs-notes-content-wrap .kbs-notes-content-section p,
+.kbs-replies-content-wrap .kbs-replies-content-section p {
+	font-size : 16px;
+}
+
+.kbs_historic_replies_wrapper {
+	border              : 1px solid #cecece;
+	background          : #fff;
+	border-top-width : 0;
+}
+
+.kbs-historic-reply-option-fields .kbs_historic_replies_wrapper:first-child {
+	border-top-width : 1px;
+}
+
+.kbs-replies-content-wrap {
+	border-color:#93a1b0;
+}
+
+.helptain-action-button ul.helptain-actionbar-sub-menu,
+.helptain-actions-sub-menu {
+	position      : absolute;
+	display       : block;
+	background    : #fff;
+	width         : 200px;
+	top           : 42px;
+	border        : 1px solid #cecece;
+	border-radius : 5px;
+	left          : 0;
+	z-index       : 9999;
+}
+
+.helptain-actions-sub-menu {
+	width      : 150px;
+	text-align : center;
+	margin     : 0 auto;
+	right      : 0;
+	left       : auto;
+}
+
+.helptain-action-button ul.helptain-actionbar-sub-menu.kbs-hidden,
+.helptain-actions-sub-menu.kbs-hidden {
+	display : none;
+}
+
+.helptain-action-button ul.helptain-actionbar-sub-menu li,
+.helptain-actions-sub-menu li {
+	padding : 5px 10px;
+	cursor  : pointer;
+	margin  : 0 auto;
+}
+
+.helptain-action-button ul.helptain-actionbar-sub-menu li:hover,
+.helptain-actions-sub-menu li:hover {
+	background : #f1f3f5;
+	color      : #07c;
+}
+
+#helptain-action-bar .helptain-action-buttons .helptain-action-button ul.helptain-actionbar-sub-menu li a {
+	font-size       : 13px;
+	text-decoration : none;
+}
+
+.helptain-admin-row-actions-toggle {
+	width       : 13px;
+	height      : 13px;
+	font-size   : 13px;
+	transform   : rotate(90deg);
+	color       : #93a1b0;
+	margin-left : 10px;
+	outline     : none !important;
+	box-shadow  : none !important;
+}
+
+/**
+** Metaboxes
+ */
+
+#kbs-ticket-metabox-ticket-reply,
+#kbs-ticket-metabox-ticket-details {
+	background : transparent;
+	border     : 0;
+	box-shadow : none;
+}
+
+#kbs-ticket-reply-wrap,
+#kbs-ticket-add-note-container{
+	background : #fff;
+	padding    : 12px;
+	border     : 1px solid #c3c4c7;
+	border-top : 0;
+}
+
+#kbs-ticket-metabox-ticket-reply > .postbox-header,
+#kbs-ticket-metabox-ticket-details > .postbox-header {
+	display : none;
+}
+
+#kbs-ticket-metabox-ticket-reply > .inside,
+#kbs-ticket-metabox-ticket-details > .inside {
+	padding : 0;
+}
+
+
+#kbs-ticket-metabox-ticket-details .kbs_ticket_content_wrapper {
+	border: 1px solid #cecece;
+	background: #fff;
+}
+
+#kbs-ticket-metabox-ticket-details .kbs_ticket_content_wrapper .kbs-ticket-content-row-standard-fields {
+	border-left: 5px solid #93a1b0;
+	background:#fff;
+}
+
+.kbs_historic_replies_wrapper .kbs-replies-content-wrap .helptain-replies-viewed {
+	font-style : italic;
+	color      : #a5b2bd;
+}
+
+.kbs_historic_replies_wrapper .kbs-replies-content-sections .helptain-reply-attachments li {
+	background    : #fff;
+	border-radius : 12px;
+	border        : 1px solid #dadada;
+	display       : inline-block;
+	line-height   : 1;
+	margin        : 8px 4px 8px 0;
+	padding       : 4px 10px;
+	position      : relative;
+	color         : #a5b2bd;
+}
+
+.kbs_historic_replies_wrapper .kbs-replies-content-sections .helptain-reply-attachments li.icon {
+	border    : 0;
+	padding   : 0;
+}
+
+.kbs_historic_replies_wrapper .kbs-replies-content-sections .helptain-reply-attachments li.icon span {
+	font-size : 16px;
+}
+
+.kbs_historic_replies_wrapper .kbs-replies-content-sections .helptain-reply-attachments li a {
+	display : inline-block;
+	color   : #07c;
+}
+
+.kbs_historic_replies_wrapper .kbs-replies-content-sections .helptain-reply-attachments li a i.name {
+	overflow         : hidden;
+	-o-text-overflow : ellipsis;
+	text-overflow    : ellipsis;
+	white-space      : nowrap;
+	display          : inline-block;
+	font-style       : normal;
+	max-width        : 200px;
+	vertical-align   : middle;
+}
+
+.kbs_historic_replies_wrapper .kbs-replies-content-sections .helptain-reply-attachments li a span.size {
+	color          : #96989a;
+	display        : inline-block;
+	font-weight    : 400;
+	text-transform : lowercase;
+	vertical-align : middle;
+}
+
+.kbs-replies-row-actions .wpchill-tooltip > span {
+	text-decoration : none;
+	color           : #a5b2bd;
+}
+
+.kbs-replies-row-actions .wpchill-tooltip .wpchill-tooltip-content {
+	text-align:left;
 }

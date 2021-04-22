@@ -55,27 +55,29 @@ function kbs_load_scripts() {
 	$needs_bs4 = apply_filters( 'kbs_scripts_need_bs4', $needs_bs4 );
 
 	wp_localize_script( 'kbs-ajax', 'kbs_scripts', apply_filters( 'kbs_ajax_script_vars', array(
-        'ajax_loader'           => KBS_PLUGIN_URL . 'assets/images/loading.gif',
+		'ajax_loader'           => KBS_PLUGIN_URL . 'assets/images/loading.gif',
 		'ajaxurl'               => kbs_get_ajax_url(),
-        'honeypot_fail'         => __( 'Honeypot validation error', 'kb-support' ),
-        'is_submission'         => $is_submission,
+		'honeypot_fail'         => __( 'Honeypot validation error', 'kb-support' ),
+		'is_submission'         => $is_submission,
 		'max_files'             => kbs_get_max_file_uploads(),
 		'max_files_exceeded'    => kbs_get_notices( 'max_files', true ),
 		'needs_bs4'             => $needs_bs4,
-        'one_option'            => __( 'Choose an option', 'kb-support' ),
+		'one_option'            => __( 'Choose an option', 'kb-support' ),
 		'one_or_more_option'    => __( 'Choose one or more options', 'kb-support' ),
-        'permalinks'            => get_option( 'permalink_structure' ) ? '1' : '0',
-        'recaptcha_site_key'    => kbs_get_option( 'recaptcha_site_key' ),
-        'recaptcha_version'     => kbs_get_recaptcha_version(),
-        'replies_to_load'       => kbs_get_customer_replies_to_load(),
-        'reply_label'           => kbs_get_ticket_reply_label(),
-        'search_placeholder'    => __( 'Search options', 'kb-support' ),
-        'submit_ticket'         => kbs_get_form_submit_label(),
+		'permalinks'            => get_option( 'permalink_structure' ) ? '1' : '0',
+		'recaptcha_site_key'    => kbs_get_option( 'recaptcha_site_key' ),
+		'recaptcha_version'     => kbs_get_recaptcha_version(),
+		'replies_to_load'       => kbs_get_customer_replies_to_load(),
+		'reply_label'           => kbs_get_ticket_reply_label(),
+		'search_placeholder'    => __( 'Search options', 'kb-support' ),
+		'submit_ticket'         => kbs_get_form_submit_label(),
 		'submit_ticket_loading' => __( 'Please Wait...', 'kb-support' ),
-        'type_to_search'        => __( 'Type to search', 'kb-support' ),
+		'type_to_search'        => __( 'Type to search', 'kb-support' ),
+		'ticket_submitted'      => esc_html__( 'Great Work, your ticket has been submitted', 'kb-support' ),
+		'tickets_manager_link'  => kbs_get_option( 'tickets_page', false ),
 	) ) );
 
-	if ( $is_submission )	{
+	if ( $is_submission || '1' == kbs_get_option( 'floating_widget')  )	{
 		add_thickbox();
 
 		wp_register_script( 'jquery-chosen', $js_dir . 'chosen.jquery' . $suffix . '.js', array( 'jquery' ), KBS_VERSION );
@@ -194,6 +196,9 @@ function kbs_register_styles() {
 	wp_register_style( 'kbs-styles', $url, array(), KBS_VERSION, 'all' );
 	wp_enqueue_style( 'kbs-styles' );
 
+	wp_register_style( 'kbs-hover-styles', $css_dir . 'hover.min.css', array(), KBS_VERSION, 'all' );
+	wp_enqueue_style( 'kbs-hover-styles' );
+
     if ( is_admin_bar_showing() )   {
         wp_register_style( 'kbs-admin-bar', $css_dir . 'kbs-admin-bar' . $suffix . '.css', array(), KBS_VERSION, 'all' );
     	wp_enqueue_style( 'kbs-admin-bar' );
@@ -240,11 +245,17 @@ function kbs_load_admin_styles( $hook ) {
 	wp_register_style( 'jquery-ui-css', $css_dir . 'jquery-ui-' . $ui_style . $suffix . '.css' );
 	wp_enqueue_style( 'jquery-ui-css' );
 
-	wp_register_style( 'kbs-admin', $css_dir . 'kbs-admin' . $suffix . '.css', array(), KBS_VERSION );
+	wp_register_style( 'kbs-admin', $css_dir . 'admin/kbs-admin' . $suffix . '.css', array(), KBS_VERSION );
 	wp_enqueue_style( 'kbs-admin' );
 
+	if ( 'dashboard_page_kbs-getting-started' == $hook || 'dashboard_page_kbs-about' == $hook ){
+
+		wp_register_style( 'kbs-about', $css_dir . 'admin/about.css', array(), KBS_VERSION );
+		wp_enqueue_style( 'kbs-about' );
+	}
+
     if ( is_admin_bar_showing() )   {
-        wp_register_style( 'kbs-admin-bar', $css_dir . 'kbs-admin-bar' . $suffix . '.css', array(), KBS_VERSION, 'all' );
+        wp_register_style( 'kbs-admin-bar', $css_dir . 'admin/kbs-admin-bar' . $suffix . '.css', array(), KBS_VERSION, 'all' );
     	wp_enqueue_style( 'kbs-admin-bar' );
     }
 
@@ -283,8 +294,12 @@ function kbs_load_admin_scripts( $hook ) {
 		$admin_deps = array( 'jquery' );
 	}
 
-	wp_register_script( 'kbs-admin-scripts', $js_dir . 'admin-scripts' . $suffix . '.js', $admin_deps, KBS_VERSION, false );
+	wp_register_script( 'kbs-admin-scripts', $js_dir . 'admin/admin-scripts' . $suffix . '.js', $admin_deps, KBS_VERSION, false );
+	$admin_deps[] = 'kbs-admin-scripts';
+	wp_register_script( 'kbs-admin-ticket', $js_dir . '/admin/ticket-actions' . $suffix . '.js', $admin_deps, KBS_VERSION, true );
+	//wp_register_script( 'kbs-admin-ticket', $js_dir . 'admin/ticket-actions.js', $admin_deps, KBS_VERSION, true );
 	wp_enqueue_script( 'kbs-admin-scripts' );
+	wp_enqueue_script( 'kbs-admin-ticket' );
 
 	$editing_field_type = false;
 
@@ -345,7 +360,8 @@ function kbs_load_admin_scripts( $hook ) {
         'view_reply'              => __( 'View Reply', 'kb-support' ),
 		'view_note'               => __( 'View Note', 'kb-support' ),
 		'view_participants'       => __( 'View participants', 'kb-support' ),
-        'view_submission'         => __( 'View submission data', 'kb-support' )
+        'view_submission'         => __( 'View submission data', 'kb-support' ),
+		'ajax_url' 				  => kbs_get_ajax_url()
 	) );
 
 	if ( function_exists( 'wp_enqueue_media' ) && version_compare( $wp_version, '3.5', '>=' ) ) {
@@ -359,7 +375,7 @@ function kbs_load_admin_scripts( $hook ) {
 		}
 	}
 
-	wp_register_script( 'kbs-font-awesome', KBS_PLUGIN_DIR . '/assets/js/fontawesome.min.js', array(), KBS_VERSION );
+	wp_register_script( 'kbs-font-awesome', KBS_PLUGIN_URL . 'assets/js/fontawesome.min.js', array(), KBS_VERSION );
 	wp_enqueue_script( 'kbs-font-awesome' );
 
 	wp_enqueue_style( 'wp-color-picker' );

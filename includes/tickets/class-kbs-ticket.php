@@ -155,6 +155,16 @@ class KBS_Ticket {
 	 */
 	protected $modified_date = '';
 
+
+	/**
+	 * The date the ticket was last modified
+	 *
+	 * @since	1.0
+	 * @var		str
+	 */
+	protected $last_reply_date = '';
+
+
 	/**
 	 * The date the ticket was marked as 'resolved'
 	 *
@@ -487,6 +497,7 @@ class KBS_Ticket {
 		// Status and Dates
 		$this->date            = $ticket->post_date;
 		$this->modified_date   = $ticket->post_modified;
+		$this->last_reply_date = absint( '' != $this->get_meta( '_kbs_ticket_last_reply_date' ) ? $this->get_meta( '_kbs_ticket_last_reply_date' ) : strtotime($ticket->post_modified) );
 		$this->closed_date     = $this->setup_closed_date();
 		$this->status          = $ticket->post_status;
 		$this->post_status     = $this->status;
@@ -526,7 +537,7 @@ class KBS_Ticket {
 
 		// Extensions can hook here to add items to this object
 		do_action( 'kbs_setup_ticket', $this, $ticket_id );
-								
+
 		return true;
 	} // setup_ticket
 
@@ -581,7 +592,7 @@ class KBS_Ticket {
 			'privacy_accepted'  => $this->privacy_accepted,
 			'terms_agree'       => $this->terms_agreed,
 			'files'             => $this->new_files,
-			'form_data'         => $this->form_data
+			'form_data'         => $this->form_data,
 		);
 
 		$args = apply_filters( 'kbs_insert_ticket_args', array(
@@ -709,6 +720,9 @@ class KBS_Ticket {
 			$this->update_meta( '_kbs_ticket_version_created', KBS_VERSION );
 			$this->update_meta( '_ticket_data', $this->ticket_meta );
             $this->update_meta( '_kbs_pending_ticket_created_email', true );
+            // At first, last reply should be time created
+			// Need this for sorting the columns
+			$this->update_meta( '_kbs_ticket_last_reply_date', time() );
 
 			if ( kbs_use_sequential_ticket_numbers() )	{
 				$number       = kbs_get_next_ticket_number();
@@ -830,7 +844,6 @@ class KBS_Ticket {
 							'post_date' => $this->date,
 							'edit_date' => true,
 						);
-
 						wp_update_post( $args );
 						break;
 
@@ -948,7 +961,7 @@ class KBS_Ticket {
 						do_action( 'kbs_ticket_save', $this, $key );
 						break;
 				}
-                
+
 			}
 
 			$customer = new KBS_Customer( $this->customer_id );
@@ -1082,7 +1095,7 @@ class KBS_Ticket {
 	public function get_ID() {
 		return $this->ID;
 	} // get_ID
-	
+
 	/**
 	 * Retrieve the ticket content
 	 *
@@ -1092,7 +1105,7 @@ class KBS_Ticket {
 	public function get_content() {
 		$content = apply_filters( 'the_content', $this->ticket_content );
 		$content = str_replace( ']]>', ']]&gt;', $content );
-		
+
 		return apply_filters( 'kbs_ticket_content', $content );
 	} // get_content
 
@@ -1331,7 +1344,7 @@ class KBS_Ticket {
 	 * @since	1.0
 	 * @return	int
 	 */
-	public function setup_agent_id()	{	
+	public function setup_agent_id()	{
 		return $this->get_meta( '_kbs_ticket_agent_id', true );
 	} // setup_agent_id
 
@@ -1360,7 +1373,7 @@ class KBS_Ticket {
 	 * @since	1.0
 	 * @return	int
 	 */
-	public function setup_logged_by()	{	
+	public function setup_logged_by()	{
 		return $this->get_meta( '_kbs_ticket_logged_by', true );
 	} // setup_logged_by
 
@@ -1796,7 +1809,7 @@ class KBS_Ticket {
 		$args = wp_parse_args( $args, $defaults );
 
 		$this->replies = get_posts( $args );
-		
+
 		return apply_filters( 'kbs_ticket_replies', $this->replies, $this->ID );
 	} // get_replies
 
@@ -1838,7 +1851,7 @@ class KBS_Ticket {
 		if ( ! $files )	{
 			return false;
 		}
-		
+
 		return $files;
 	} // get_files
 
@@ -1925,7 +1938,7 @@ class KBS_Ticket {
 	public function get_source( $field = 'slug' ) {
 		$return = $this->source;
 
-        $sources = get_the_terms( $this->ID, 'ticket_source' );        
+        $sources = get_the_terms( $this->ID, 'ticket_source' );
 
         if ( $sources && ! is_wp_error( $sources ) ) {
             $return = $sources[0]->$field;
@@ -2024,13 +2037,15 @@ class KBS_Ticket {
         $args = apply_filters( 'kbs_ticket_add_reply_args', $args, $reply_data );
 
 		$reply_id = wp_insert_post( $args );
+		$this->update_meta( '_kbs_ticket_last_reply_date', time() );
 
 		if ( empty( $reply_id ) )	{
 			return false;
 		}
 
-		$source = ! empty( $reply_data['source'] ) ? $reply_data['source'] : 'kbs-website';
-		wp_set_object_terms( $reply_id, $source, 'ticket_source' );
+		// Comment this for now, reply shouldn't go to ticket sources
+		/*$source = ! empty( $reply_data['source'] ) ? $reply_data['source'] : 'kbs-website';
+		wp_set_object_terms( $reply_id, $source, 'ticket_source' );*/
 
 		if ( $close )	{
 			$this->update_status( 'closed' );

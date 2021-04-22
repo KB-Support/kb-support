@@ -56,9 +56,11 @@
 	display: inline-block;
 	width: 12px;
 	height: 12px;
-	background: url(images/agent_status_online.gif);
-	background-repeat: no-repeat;
+	/*background: url(images/agent_status_online.gif);
+	background-repeat: no-repeat;*/
 	background-size: 12px 12px;
+	border-radius:6px;
+	background-color: green;
 	margin: 0 0 0 5px;
 }
 .kbs_agent_status_offline:after	{
@@ -66,9 +68,11 @@
 	display: inline-block;
 	width: 12px;
 	height: 12px;
-	background: url(images/agent_status_offline.gif);
-	background-repeat: no-repeat;
+	/*background: url(images/agent_status_offline.gif);
+	background-repeat: no-repeat;*/
 	background-size: 12px 12px;
+	border-radius:6px;
+	background-color: red;
 	margin: 0 0 0 5px;
 }
 /* = General
@@ -284,12 +288,16 @@ span.kbs-time    {
 -------------------------------------------------------------- */
 .kbs-label {
 	display: inline-block;
-	padding: 2px 8px;
 	font-weight: bold;
 	color: #fff;
 	vertical-align: baseline;
 	background-color: #999;
-	border-radius: 3px;
+	border-radius:15px;
+	margin-right:5px;
+	padding:2px 10px;
+	min-width:75px;
+	font-size:13px;
+	text-align:center;
 }
 
 .kbs-label a,
@@ -318,17 +326,20 @@ span.kbs-time    {
 	width: 100%;
 	z-index: 2;
 	font-size: 90%;
+	background:#fff;
 }
 #kbs_item_wrapper .data_section {
-	border-bottom: 1px solid #eee;
+	/*border-bottom: 1px solid #eee;*/
 	margin-bottom: 10px;
 	overflow: auto;
 }
 #kbs_item_wrapper .data_section table {
 	margin-bottom: 20px;
+	background:#fff;
 }
+
 #kbs_item_wrapper > div {
-	padding: 0px 20px;
+	padding: 0 20px;
 }
 #kbs_item_wrapper > div:first-child {
 	padding-top: 20px;
@@ -442,9 +453,10 @@ span.kbs-time    {
 }
 
 .kbs-replies-row-header {
-	clear: both;
-	background: #f1f1f1;
-	border: 1px solid #e5e5e5;
+	clear            : both;
+	background-color : rgb(243, 244, 246);
+	border-radius    : 5px;
+	box-shadow       : 0 0 3px rgba(107, 114, 128, 0.5);
 }
 
 .kbs-replies-row-header:before,
@@ -487,7 +499,7 @@ span.kbs-time    {
 }
 
 a.ticket_reply_content	{
-	cursor: pointer;	
+	cursor: pointer;
 }
 
 .kbs_replies_load_more	{
@@ -597,7 +609,7 @@ a .kbs_action_button    {
 #kbs_search_form input[type=submit]:hover,
 #kbs_search_form button,
 #kbs_search_form button:hover {
-	position: relative; 
+	position: relative;
 	left: -4px;
 	border: 1px solid #d0d0d0;
 	padding: 6px 15px 6px 15px;
@@ -634,3 +646,187 @@ div.kbs_articles_list ul li	{
 div.kbs_articles_list ul li span	{
 	display: block;
 }
+
+/**
+** WPChill general table
+ */
+
+.wpchill-table {
+	border : 0;
+}
+
+.wpchill-table th,
+.wpchill-table td {
+	border-left   : 0;
+	border-right  : 0;
+	border-bottom : 0;
+	border-top    : 1px solid #f3f4f6;
+	color         : rgb(107, 114, 128);
+}
+
+.wpchill-table .wpchill-tooltip-content {
+	font-size:13px;
+}
+
+.wpchill-table a {
+	color : rgb(107, 114, 128);
+}
+
+.wpchill-table span.kbs-label-status {
+	color : #fff;
+}
+
+/**
+Ticket history form
+ */
+
+.ticket_info_wrapper #ticket_history,
+.wpchill-table {
+	border-radius : 5px;
+	box-shadow    : 0 0 10px rgba(107, 114, 128, 0.5);
+}
+
+.ticket_info_wrapper #ticket_history th,
+.ticket_info_wrapper #ticket_history td,
+.wpchill-table th,
+.wpchill-table td {
+	border     : 0;
+	border-top : 1px solid #f3f4f6;
+	text-align : left;
+}
+
+.ticket_info_wrapper #ticket_history,
+.ticket_info_wrapper #ticket_history a:not(.button),
+.ticket_info_wrapper #ticket_history p,
+.ticket_info_wrapper #ticket_history span:not(.kbs-label-status),
+.wpchill-table a:not(.button),
+.wpchill-table p,
+.wpchill-table span {
+	color : rgb(107, 114, 128);
+}
+
+.ticket_info_wrapper #ticket_history a,
+.wpchill-table a {
+	text-decoration:none;
+}
+
+#kbs_item_wrapper .data_section table#ticket_history tbody tr,
+.wpchill-table tbody tr {
+	background : #fff;
+	transition : 550ms;
+}
+
+#kbs_item_wrapper .data_section table#ticket_history tbody tr:hover,
+.wpchill-table tbody tr:hover{
+	background-color : rgb(243, 244, 246)
+}
+
+#kbs_item_wrapper .data_section table#ticket_history sup.ticket-history-new-replies {
+	color : red;
+}
+
+.ticket_info_wrapper #ticket_history tr#ticket_history_header,
+.wpchill-table thead tr{
+	background-color : rgb(243, 244, 246);
+	color            : rgb(107, 114, 128);
+}
+
+.ticket_info_wrapper #ticket_history a.button,
+.wpchill-table a.button {
+	padding    : 5px 15px;
+	background : #05aae8;
+}
+
+.ticket_info_wrapper #ticket_history a:hover,
+.wpchill-table a:hover {
+	color : #05aae8;
+}
+
+html body a.kbs-hover,
+html body input.kbs-hover,
+html body button.kbs-hover,
+.wpchill-table a.kbs-hover,
+.wpchill-table input.kbs-hover,
+.wpchill-table button.kbs-hover{
+	transition : 0.5s;
+}
+
+/**
+Reply form
+ */
+
+form#kbs_ticket_reply_form .button {
+	padding         : 5px 15px;
+	background      : #05aae8;
+	text-decoration : none;
+}
+
+form#kbs_ticket_reply_form .kbs-replies-row-header {
+	padding : 10px 25px 10px 10px;
+	border  : 0;
+}
+
+form#kbs_ticket_reply_form .kbs-replies-row-header .new-reply {
+	position : absolute;
+	color    : red;
+	right    : 5px;
+}
+
+form#kbs_ticket_reply_form #kbs-ticket-replies .kbs-replies-row-title,
+form#kbs_ticket_reply_form #kbs-ticket-replies .kbs-replies-row-actions {
+	color : rgb(107, 114, 128);
+}
+
+
+/**
+Tooltips
+ */
+
+.wpchill-tooltip {
+	position: relative;
+	display: inline-block;
+	float: left;
+	margin-right: 10px;
+}
+
+.wpchill-tooltip > span {
+	cursor: pointer;
+	color: #0073aa;
+	text-decoration: underline;
+	margin-left: 5px;
+}
+
+.wpchill-tooltip .wpchill-tooltip-content {
+	display: none;
+	position: absolute;
+	top: 50%;
+	right: -10px;
+	transform: translate( 100% ,-50% );
+	width: 300px;
+	background: #000;
+	color: #fff;
+	padding: 10px;
+	box-sizing: border-box;
+	z-index: 99;
+}
+
+.wpchill-tooltip .wpchill-tooltip-content:before {
+	content: '';
+	width: 0px;
+	height: 0px;
+	border-style: solid;
+	border-width: 8px 8px 8px 0;
+	border-color: transparent #000 transparent transparent;
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: -8px;
+	transform: translateY( -50% );
+}
+
+.wpchill-tooltip:hover .wpchill-tooltip-content {
+	display: block;
+}
+/**
+End Tooltips
+ */

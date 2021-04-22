@@ -173,8 +173,8 @@ module.exports = function( grunt ) {
 		cssmin:	{
 			build:	{
 				files: {
-					'<%= dirs.main.css %>/kbs-admin.min.css': ['<%= dirs.main.css %>/kbs-admin.css'],
-                    '<%= dirs.main.css %>/kbs-admin-bar.min.css': ['<%= dirs.main.css %>/kbs-admin-bar.css'],
+					'<%= dirs.main.css %>/admin/kbs-admin.min.css': ['<%= dirs.main.css %>/admin/kbs-admin.css'],
+                    '<%= dirs.main.css %>/admin/kbs-admin-bar.min.css': ['<%= dirs.main.css %>/admin/kbs-admin-bar.css'],
 					'<%= dirs.templates.css %>/kbs.min.css': ['<%= dirs.templates.css %>/kbs.css']
 				}
 			}
@@ -184,7 +184,8 @@ module.exports = function( grunt ) {
 		uglify: {
 			dist: {
 				files: {
-					'<%= dirs.main.js %>/admin-scripts.min.js': ['<%= dirs.main.js %>/admin-scripts.js'],
+					'<%= dirs.main.js %>/admin/admin-scripts.min.js': ['<%= dirs.main.js %>/admin/admin-scripts.js'],
+					'<%= dirs.main.js %>/admin/ticket-actions.min.js': ['<%= dirs.main.js %>/admin/ticket-actions.js'],
 					'<%= dirs.main.js %>/kbs-ajax.min.js': ['<%= dirs.main.js %>/kbs-ajax.js'],
 					'<%= dirs.main.js %>/kbs-live-search.min.js': ['<%= dirs.main.js %>/kbs-live-search.js']
 				}

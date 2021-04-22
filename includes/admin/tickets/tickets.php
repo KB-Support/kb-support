@@ -1,7 +1,7 @@
-<?php	
+<?php
 /**
  * Manage kbs-ticket posts.
- * 
+ *
  * @since		1.0
  * @package		KBS
  * @subpackage	Posts
@@ -70,15 +70,16 @@ function kbs_set_kbs_ticket_post_columns( $columns ) {
 	$tag_labels      = kbs_get_taxonomy_labels( 'ticket_tag' );
 
 	$columns = array(
-        'cb'               => '<input type="checkbox" />',
-        'id'               => '#',
-		'title'            => __( 'Title', 'kb-support' ),
-		'dates'            => __( 'Date', 'kb-support' ),
-        'customer'         => __( 'Customer', 'kb-support' ),
-		'ticket_category'  => $category_labels['menu_name'],
-		'ticket_tag'       => $tag_labels['menu_name'],
-        'agent'            => __( 'Agent', 'kb-support' )
-    );
+		'cb'              => '<input type="checkbox" />',
+		'id'              => '#',
+		'title'           => __( 'Title', 'kb-support' ),
+		'status'          => __( 'Status', 'kb-support' ),
+		'dates'           => __( 'Updated', 'kb-support' ),
+		'customer'        => __( 'Customer', 'kb-support' ),
+		'ticket_category' => $category_labels['menu_name'],
+		'ticket_tag'      => $tag_labels['menu_name'],
+		'agent'           => __( 'Agent', 'kb-support' )
+	);
 
 	if ( kbs_track_sla() )	{
 		$columns['sla'] = __( 'SLA Status', 'kb-support' );
@@ -139,7 +140,9 @@ function kbs_set_kbs_ticket_column_data( $column_name, $post_id ) {
 		case 'dates':
 			echo kb_tickets_post_column_date( $post_id, $kbs_ticket );
 			break;
-
+		case 'status':
+			echo kb_tickets_post_column_status( $post_id, $kbs_ticket );
+			break;
 		case 'customer':
 			echo kb_tickets_post_column_customer( $post_id, $kbs_ticket );
 			$company = kbs_get_company_name( $kbs_ticket->company_id );
@@ -196,7 +199,7 @@ function kbs_set_kbs_ticket_column_data( $column_name, $post_id ) {
 		case 'agent':
 			echo kb_tickets_post_column_agent( $post_id, $kbs_ticket );
 			break;
-			
+
 		case 'sla':
 			echo kb_tickets_post_column_sla( $post_id, $kbs_ticket );
 			break;
@@ -218,9 +221,7 @@ add_action( 'manage_kbs_ticket_posts_custom_column' , 'kbs_set_kbs_ticket_column
  */
 function kb_tickets_post_column_id( $ticket_id, $kbs_ticket )	{
 	do_action( 'kbs_tickets_pre_column_id', $kbs_ticket );
-
-	$output = sprintf( '<span class="kbs-label kbs-label-status" style="background-color: %s;"><a href="%s" title="%s">%s</a></span>',
-		kbs_get_ticket_status_colour( get_post_status_object( $kbs_ticket->post_status )->name ),
+	$output = sprintf( '<a href="%s" title="%s">%s</a>',
 		get_edit_post_link( $ticket_id ),
 		kbs_get_post_status_label( $kbs_ticket->post_status ),
 		kbs_format_ticket_number( kbs_get_ticket_number( $ticket_id ) )
@@ -234,10 +235,11 @@ function kb_tickets_post_column_id( $ticket_id, $kbs_ticket )	{
         );
     }
 
-	if ( $kbs_ticket->last_replier )	{
+	if ( $kbs_ticket->last_replier ){
 		$output .= '<p>';
 		$output .= sprintf(
-			__( '<span class="kbs-label kbs-reply-status" style="background-color: %s;">%s replied</span>', 'kb-support' ),
+			__( '<svg aria-hidden="true" focusable="false" width="20" height="14" data-prefix="fas" data-icon="level-up-alt" class="svg-inline--fa fa-level-up-alt fa-w-10 kbs-label kbs-reply-status %s-replied" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path fill="currentColor" d="M313.553 119.669L209.587 7.666c-9.485-10.214-25.676-10.229-35.174 0L70.438 119.669C56.232 134.969 67.062 160 88.025 160H152v272H68.024a11.996 11.996 0 0 0-8.485 3.515l-56 56C-4.021 499.074 1.333 512 12.024 512H208c13.255 0 24-10.745 24-24V160h63.966c20.878 0 31.851-24.969 17.587-40.331z" style="fill: %s;"></path></svg><span>%s replied</span>', 'kb-support' ),
+			esc_attr( strtolower( $kbs_ticket->last_replier ) ),
 			kbs_get_ticket_reply_status_colour( $kbs_ticket->last_replier ),
 			$kbs_ticket->last_replier
 		);
@@ -249,6 +251,18 @@ function kb_tickets_post_column_id( $ticket_id, $kbs_ticket )	{
 	return apply_filters( 'kb_tickets_post_column_id', $output, $ticket_id );
 } // kb_tickets_post_column_id
 
+function kb_tickets_post_column_status($ticket_id,$kbs_ticket){
+
+	$output = sprintf( '<span class="kbs-status" style="background-color: %s;">%s</span>',
+		kbs_get_ticket_status_colour( $kbs_ticket->post_status  ),
+		kbs_get_post_status_label( $kbs_ticket->post_status )
+	);
+
+	do_action( 'kbs_tickets_post_column_status', $kbs_ticket );
+
+	return apply_filters( 'kb_tickets_post_column_status', $output, $ticket_id );
+}
+
 /**
  * Output the Date row.
  *
@@ -257,12 +271,28 @@ function kb_tickets_post_column_id( $ticket_id, $kbs_ticket )	{
  * @param	obj	$kbs_ticket	The KBS Ticket object
  * @return	str
  */
-function kb_tickets_post_column_date( $ticket_id, $kbs_ticket )	{
+function kb_tickets_post_column_date( $ticket_id, $kbs_ticket ){
 	do_action( 'kbs_tickets_pre_column_date', $kbs_ticket );
 
-	$output  = date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $kbs_ticket->date ) );
-	$output .= '<br />';
-	$output .= date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $kbs_ticket->modified_date ) );
+	$dif = absint( time() - $kbs_ticket->last_reply_date );
+
+	$time_passed = 0;
+
+	if ( ( $dif / ( 60 ) ) < 60 ){
+		$time_passed = absint( $dif / ( 60 ) ) . ( ( absint( $dif / ( 60 ) ) <= 1 ) ? esc_html__( ' minute', 'kb-support' ) : esc_html__( ' minutes ago', 'kb-support' ) );
+	} else if ( ( $dif / ( 60 * 60 ) ) <= 24 ){
+		$time_passed = absint( $dif / ( 60 * 60 ) ) . ( ( absint( $dif / ( 60 * 60 ) ) <= 1 ) ? esc_html__( ' hour', 'kb-support' ) : esc_html__( ' hours ago', 'kb-support' ) );
+	} else {
+		$time_passed = absint( $dif / ( 60 * 60 * 24 ) ) . ( ( absint( $dif / ( 60 * 60 * 24 ) ) <= 1 ) ? esc_html__( ' day', 'kb-support' ) : esc_html__( ' days ago', 'kb-support' ) );
+	}
+
+	$tooltip = '<div class="wpchill-tooltip"><span>[?]</span>' .
+			   '<div class="wpchill-tooltip-content">' .
+			   esc_html__( 'Receive date:  ', 'kb-support' ) .
+			   date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $kbs_ticket->date ) ) .
+			   '</div></div>';
+
+	$output = $time_passed . $tooltip;
 
 	do_action( 'kbs_tickets_post_column_date', $kbs_ticket );
 
@@ -390,28 +420,30 @@ function kbs_order_admin_tickets( $query )	{
 	$order   = '' != $query->get( 'order' )   ? $query->get( 'order' )   : $order_setting;
 
 	switch( $orderby )	{
-		case 'ID':
-        case 'id':
+        case 'ID':
 			$query->set( 'orderby',  'ID' );
 			$query->set( 'order',  $order );
 			break;
-
-		case 'post_date':
-        case 'date':
-        case 'dates':
-			$query->set( 'orderby',  'post_date' );
-			$query->set( 'order',  $order );
+		case 'date':
+			$query->set( 'orderby', 'meta_value modified' );
+			$query->set( 'meta_query', array(
+					'relation' => 'OR',
+					array(
+						'key'     => '_kbs_ticket_last_reply_date',
+						'compare' => 'EXISTS'
+					),
+					array(
+						'key'     => '_kbs_ticket_last_reply_date',
+						'compare' => 'NOT EXISTS'
+					),
+				)
+			);
+			$query->set( 'order', $order );
 			break;
-
-		case 'modified':
-			$query->set( 'orderby',  'modified' );
-			$query->set( 'order',  $order );
-			break;
-
 		case 'title':
 			$query->set( 'orderby',  'title' );
 			$query->set( 'order',  $order );
-			break;			
+			break;
 	}
 } // kbs_order_admin_tickets
 add_action( 'pre_get_posts', 'kbs_order_admin_tickets' );
@@ -872,7 +904,7 @@ add_action( 'pre_get_posts', 'kbs_remove_inactive_tickets' );
  */
 function kbs_ticket_filter_views( $views )	{
 	$active_only = kbs_get_option( 'hide_closed' );
-    $span_string = '<span class="kbs-label kbs-label-status" style="background-color: %s;">';
+    $span_string = '<span class="kbs-label kbs-label-status" style="background-color: %s;"></span>';
     $all_colour  = kbs_get_ticket_status_colour( 'all', true );
 
 	if ( isset( $views['mine'] ) )	{
@@ -889,7 +921,7 @@ function kbs_ticket_filter_views( $views )	{
 
             if ( 'all' == $status ) {
                 $search       = __( 'All', 'kb-support' );
-                $replace      = sprintf( __( 'All %s', 'kb-support' ), kbs_get_ticket_label_plural() ); 
+                $replace      = sprintf( __( 'All %s', 'kb-support' ), kbs_get_ticket_label_plural() );
                 $views['all'] = str_replace( $search, $replace, $views['all'] );
                 $colour       = $all_colour;
             }
@@ -925,7 +957,7 @@ function kbs_ticket_filter_views( $views )	{
                 if ( ! empty( $num_posts->$status ) && in_array( $status, $all_statuses ) )	{
                     $views[ $status ] = preg_replace( '/\(.+\)/U', '(' . number_format_i18n( $num_posts->$status ) . ')', $views[ $status ] );
 
-                    $views[ $status ] = $span . $views[ $status ] . '</span>';
+                    $views[ $status ] = $span . '<span>' . $views[ $status ] . '</span>';
                 }
                 if ( ! in_array( $status, $inactive_statuses ) )	{
                     $count += $status_count;
@@ -937,10 +969,10 @@ function kbs_ticket_filter_views( $views )	{
 
         if ( $active_only )	{
             $search       = __( 'All', 'kb-support' );
-            $replace      = sprintf( __( 'Active %s', 'kb-support' ), kbs_get_ticket_label_plural() ); 
+            $replace      = sprintf( __( 'Active %s', 'kb-support' ), kbs_get_ticket_label_plural() );
             $views['all'] = str_replace( $search, $replace, $views['all'] );
             $views['all'] = sprintf(
-                $span_string . $views['all'] . '</span>',
+                $span_string . '<span>' . $views['all'] . '</span>',
                 $all_colour
             );
         }
@@ -1016,7 +1048,7 @@ add_filter( 'post_row_actions', 'kbs_tickets_remove_ticket_post_actions' );
  *
  * @return	void
  */
-function kbs_ticket_post_save( $post_id, $post, $update )	{	
+function kbs_ticket_post_save( $post_id, $post, $update )	{
 
 	if ( ! isset( $_POST['kbs_ticket_meta_box_nonce'] ) || ! wp_verify_nonce( $_POST['kbs_ticket_meta_box_nonce'], 'kbs_ticket_meta_save' ) ) {
 		return;

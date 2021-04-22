@@ -116,7 +116,7 @@ function kbs_get_ticket_reply_status_colour( $replier, $default = false )	{
  *
  * @since	1.0
  * @param	int			$ticket_id		The Ticket ID.
- * @return	obj|false	
+ * @return	obj|false
  */
 function kbs_ticket_has_agent_reply( $ticket_id )	{
 	$reply_args = array(
@@ -174,12 +174,24 @@ function kbs_get_reply_html( $reply, $ticket_id = 0, $expand = false ) {
 		$reply = get_post( $reply );
 	}
 
-	$author      = kbs_get_reply_author_name( $reply, true );
+	$roles         = get_userdata( $reply->post_author )->roles;
+	$support_roles = kbs_get_agent_user_roles();
+	$_is_support   = '';
+
+	if ( is_array( $roles ) ) {
+		if ( ! empty( array_intersect( $roles, $support_roles ) ) ) {
+			$_is_support = 'is-support';
+		}
+	} else {
+		if ( in_array( $roles, $support_roles ) ) {
+			$_is_support = 'is-support';
+		}
+	}
+	$author        = kbs_get_reply_author_name( $reply, true );
+
 	$date_format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
 	$files       = kbs_ticket_has_files( $reply->ID );
 	$file_count  = ( $files ? count( $files ) : false );
-    $show        = $expand ? ' style="display: block;"' : '';
-	$show_hide   = $expand ? __( 'Hide', 'kb-support' ) : __( 'View', 'kb-support' );
 
 	$create_article_link = add_query_arg( array(
 		'kbs-action' => 'create_article',
@@ -189,29 +201,16 @@ function kbs_get_reply_html( $reply, $ticket_id = 0, $expand = false ) {
 
 	$create_article_link = apply_filters( 'kbs_create_article_link', $create_article_link, $ticket_id, $reply );
 
-    $actions = array(
-        'read_reply'     => '<a href="#" class="toggle-view-reply-option-section">' . sprintf( __( '%s Reply', 'kb-support' ), $show_hide ) . '</a>',
-        'create_article' => '<a href="' . $create_article_link . '" class="toggle-reply-option-create-article">' . sprintf( __( 'Create %s', 'kb-support' ), kbs_get_article_label_singular() ) . '</a>'
-    );
+	$actions = array(
+		'create_article' => '<a href="' . $create_article_link . '" class="toggle-reply-option-create-article" title="' . sprintf( __( 'Create %s', 'kb-support' ), kbs_get_article_label_singular() ) . '">' . sprintf( __( 'Create %s', 'kb-support' ), kbs_get_article_label_singular() ) . '</a>',
+	);
 
     $actions = apply_filters( 'kbs_ticket_replies_actions', $actions, $reply );
 
-    $icons   = array();
+	$is_read = false;
 
     if ( false === strpos( $author, __( 'Customer', 'kb-support' ) ) && false === strpos( $author, __( 'Participant', 'kb-support' ) ) )  {
         $is_read = kbs_reply_is_read( $reply->ID );
-        if ( $is_read )  {
-            $icons['is_read'] = sprintf(
-                '<span class="dashicons dashicons-visibility" title="%s %s"></span>',
-                __( 'Read by customer on', 'kb-support' ),
-                date_i18n( $date_format, strtotime( $is_read ) )
-            );
-        } else  {
-            $icons['not_read'] = sprintf(
-                '<span class="dashicons dashicons-hidden" title="%s"></span>',
-                __( 'Customer has not read', 'kb-support' )
-            );
-        }
 
         if ( 'closed' != get_post_status( $ticket_id ) && ( current_user_can( 'manage_ticket_settings' ) || get_current_user_id() == $reply->post_author ) ) {
 
@@ -222,7 +221,7 @@ function kbs_get_reply_html( $reply, $ticket_id = 0, $expand = false ) {
             ), admin_url() ), 'delete_ticket_reply', 'kbs_nonce' );
 
             $actions['trash'] = sprintf(
-                '<a href="%s" class="kbs-delete delete-reply">%s</a>',
+                '<a href="%1$s" class="kbs-delete delete-reply" title="%2$s">%2$s</a>',
                 $delete_url,
                 __( 'Delete Reply', 'kb-support' )
             );
@@ -231,29 +230,52 @@ function kbs_get_reply_html( $reply, $ticket_id = 0, $expand = false ) {
 
     }
 
-    if ( $file_count )  {
-        $icons['files'] = sprintf(
-            '<span class="dashicons dashicons-media-document" title="%s"></span>',
-            $file_count . ' ' . _n( 'attached file', 'attached files', $file_count, 'kb-support' )
-        );
-    }
 
-    $icons   = apply_filters( 'kbs_ticket_replies_icons', $icons, $reply );
+	$icons = apply_filters( 'kbs_ticket_replies_icons', array(), $reply );
 
-    ob_start(); ?>
+	ob_start(); ?>
 
-    <div class="kbs-replies-row-header">
-        <span class="kbs-replies-row-title">
-            <?php echo apply_filters( 'kbs_replies_title', sprintf( __( '%s by %s', 'kb-support' ), date_i18n( $date_format, strtotime( $reply->post_date ) ), $author ), $reply ); ?>
+	<div class="kbs-replies-row-header <?php echo esc_attr($_is_support); ?>">
+		<span class="kbs-replies-row-actions">
+			<?php
+
+			if ( ! empty( $icons ) ) {
+				foreach ( $icons as $icon ) {
+					echo '<div class="wpchill-tooltip wpchill-no-float"><span class="' . esc_attr( $icon['icon_class'] ) . '"></span>' .
+										 '<div class="wpchill-tooltip-content">' .
+										 esc_html( $icon['description'] ) .
+										 '</div></div>';
+				}
+			}
+
+			$dif         = absint( time() - strtotime( $reply->post_date ) );
+			$time_passed = 0;
+
+			if ( ( $dif / ( 60 ) ) < 60 ) {
+				$time_passed = absint( $dif / ( 60 ) ) . ( ( absint( $dif / ( 60 ) ) <= 1 ) ? esc_html__( ' minute', 'kb-support' ) : esc_html__( ' minutes ago', 'kb-support' ) );
+			} else if ( ( $dif / ( 60 * 60 ) ) <= 24 ) {
+				$time_passed = absint( $dif / ( 60 * 60 ) ) . ( ( absint( $dif / ( 60 * 60 ) ) <= 1 ) ? esc_html__( ' hour', 'kb-support' ) : esc_html__( ' hours ago', 'kb-support' ) );
+			} else {
+				$time_passed = absint( $dif / ( 60 * 60 * 24 ) ) . ( ( absint( $dif / ( 60 * 60 * 24 ) ) <= 1 ) ? esc_html__( ' day', 'kb-support' ) : esc_html__( ' days ago', 'kb-support' ) );
+			}
+
+			echo $time_passed;
+			?>
+			<a href="#" class="helptain-admin-row-actions-toggle dashicons dashicons-ellipsis"></a>
+			<ul class="helptain-admin-row-actions helptain-actions-sub-menu kbs-hidden">
+				<?php
+				foreach($actions as $action){
+					echo '<li>'.$action.'</li>';
+				}
+				?>
+			</ul>
         </span>
-
-        <span class="kbs-replies-row-actions">
-            <?php echo implode( ' ', $icons ); ?>
-			<?php echo implode( '&nbsp;&#124;&nbsp;', $actions ); ?>
+        <span class="kbs-replies-row-title">
+			<?php echo '<strong>' . esc_html( $author ) . '</strong> ' . esc_html__( 'replied', 'kb-support' ); ?>
         </span>
     </div>
 
-    <div class="kbs-replies-content-wrap"<?php echo $show; ?></div>
+    <div class="kbs-replies-content-wrap <?php echo esc_attr($_is_support); ?>" expanded="true">
         <div class="kbs-replies-content-sections">
         	<?php do_action( 'kbs_before_reply_content_section', $reply ); ?>
             <div id="kbs-reply-option-section-<?php echo $reply->ID; ?>" class="kbs-replies-content-section">
@@ -265,20 +287,31 @@ function kbs_get_reply_html( $reply, $ticket_id = 0, $expand = false ) {
             <?php if ( $files ) : ?>
                 <div class="kbs-replies-files-section">
                 	<?php do_action( 'kbs_replies_before_files', $reply ); ?>
-                    <ol>
-                        <?php foreach( $files as $file ) : ?>
-                            <li>
-                            	<a href="<?php echo wp_get_attachment_url( $file->ID ); ?>" target="_blank">
-									<?php echo basename( get_attached_file( $file->ID ) ); ?>
-                                </a>
-                            </li>
-                        <?php endforeach; ?>
-                    </ol>
+
+					<ul class="helptain-reply-attachments">
+						<li class="icon"><span class="dashicons dashicons-paperclip"></span></li>
+						<?php foreach ( $files as $file ) :
+							$attached_file = get_attached_file( $file->ID );
+							?>
+							<li>
+								<a href="<?php echo wp_get_attachment_url( $file->ID ); ?>" target="_blank">
+									<i class="name"><?php echo esc_html( basename( $attached_file ) ); ?></i>
+									<span
+										class="size"><?php echo esc_html( size_format( filesize( $attached_file ) ) ); ?></span>
+								</a>
+							</li>
+						<?php endforeach; ?>
+					</ul>
                     <?php do_action( 'kbs_replies_after_files', $reply ); ?>
                 </div>
             <?php endif; ?>
             <?php do_action( 'kbs_after_reply_content_section', $reply ); ?>
         </div>
+		<?php
+		if ( $is_read ) {
+			echo '<p class="helptain-replies-viewed"><i class="dashicons dashicons-visibility"></i> ' . esc_html__( 'Customer viewed on','kb-support' ) . ' ' . esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $is_read ) ) ) . '</p>';
+		}
+		?>
     </div>
 
     <?php
@@ -351,6 +384,59 @@ function kbs_get_reply_author_name( $reply, $role = false )	{
 	return apply_filters( 'kbs_reply_author_name', $author, $reply, $role, $author_role );
 
 } // kbs_get_reply_author_name
+
+/**
+ * Get reply user role based on reply id and ticket id
+ *
+ * @param bool $reply
+ * @param bool $ticket_id
+ *
+ * @return false|string|void
+ * @since 1.6.0
+ */
+function helptain_get_reply_role( $reply = false, $ticket_id = false ) {
+	// If we don't have one of the following we can't retrieve anything
+	if ( ! $ticket_id || ! $reply ) {
+		return;
+	}
+
+	// If it's not a kbs_ticket CPT bail
+	if ( 'kbs_ticket' != get_post_type( $ticket_id ) ) {
+		return;
+	}
+
+	// If post_author not present means it is a note and we don't need color representation
+	if ( ! $reply->post_author ) {
+		return;
+	}
+
+	// Now lets get the roles and responsible agent
+	$user_roles        = get_userdata( $reply->post_author )->roles;
+	$agent_responsible = get_post_meta( absint( $ticket_id ), '_kbs_ticket_agent_id', true );
+
+	// Check if admin
+	if ( in_array( 'administrator', $user_roles ) ) {
+		return 'admin_role';
+	}
+
+	// Check if support manager
+	if ( in_array( 'support_manager', $user_roles ) ) {
+		return 'support_manager_role';
+	}
+
+	// Check if agent
+	if ( in_array( 'support_agent', $user_roles ) ) {
+		if ( $reply->post_author == $agent_responsible ) {
+			return 'same_support_agent';
+		} else {
+			return 'support_agent';
+		}
+
+	}
+
+	// If none above it means it is customer
+	return 'support_customer';
+}
 
 /**
  * Retrieve ticket ID from reply.
